@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+import argparse
+import os
+import sys
+
+import libtmux
+
+def main():
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-s', '--session', type=str, required=True)
+  parser.add_argument('-c', '--cmd', type=str)
+  args = parser.parse_args()
+
+  commands = [l for l in sys.stdin.read().replace('\\\n', '').split('\n') if l]
+
+  server = libtmux.Server()
+  sess = server.new_session(args.session)
+  for cmd in commands:
+    window = sess.new_window(window_shell=args.cmd)
+    window.cmd('send-keys', cmd + '\n')
+  sess.windows[0].kill_window()
+
+if __name__ == '__main__':
+  main()
